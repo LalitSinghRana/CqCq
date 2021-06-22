@@ -18,39 +18,41 @@ import java.util.TimerTask;
 
 
 public class MyService extends Service {
-
     private Timer timer;
+    Long period = (Long) 5000L;
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         // write code for creating foreground service
 
-        createNotificationChannel();
+        if (intent != null && intent.getExtras()!=null) {
+            String value = intent.getStringExtra("minutes");
+            if(value != null) period = Long.parseLong(value) * 1000;
 
-        Intent intent1 = new Intent(this, MainActivity.class);
+            Intent intent1 = new Intent(this, MainActivity.class);
+            PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent1, 0);
 
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent1, 0);
+            Notification notification = new NotificationCompat.Builder(this, "ChannelId1")
+                    .setContentTitle("My App Tutorial")
+                    .setContentText("Our app is running")
+                    .setSmallIcon(R.mipmap.ic_launcher)
+                    .setContentIntent(pendingIntent).build();
 
-        Notification notification = new NotificationCompat.Builder(this, "ChannelId1")
-                .setContentTitle("My App Tutorial")
-                .setContentText("Our app is running")
-                .setSmallIcon(R.mipmap.ic_launcher)
-                .setContentIntent(pendingIntent).build();
+            startForeground(1, notification);
 
+            timer = new Timer();
+            TimerTask task = new TimerTask() {
+                @Override
+                public void run() {
+                    playSound();
+//                    System.out.println(period);
+                }
+            };
 
-        startForeground(1, notification);
-
-
-        timer = new Timer();
-        TimerTask task = new TimerTask() {
-            @Override
-            public void run() {
-                playSound();
-            }
-        };
-
-        timer.scheduleAtFixedRate(task,0,60000);
-
+            timer.scheduleAtFixedRate(task, 0,period);
+        } else {
+            System.out.println("idk something happened");
+        }
         return START_STICKY;
     }
 
