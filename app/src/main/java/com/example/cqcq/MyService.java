@@ -29,6 +29,8 @@ public class MyService extends Service {
             String value = intent.getStringExtra("minutes");
             if(value != null) period = Long.parseLong(value) * 1000;
 
+            createNotificationChannel();
+
             Intent intent1 = new Intent(this, MainActivity.class);
             PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent1, 0);
 

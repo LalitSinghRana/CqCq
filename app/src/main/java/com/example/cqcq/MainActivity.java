@@ -11,7 +11,6 @@ import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
     private Intent intent;
-    String temp;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
