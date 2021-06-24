@@ -19,7 +19,7 @@ import java.util.TimerTask;
 
 public class MyService extends Service {
     private Timer timer;
-    Long period = (Long) 5000L;
+    Long period;
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -27,7 +27,7 @@ public class MyService extends Service {
 
         if (intent != null && intent.getExtras()!=null) {
             String value = intent.getStringExtra("minutes");
-            if(value != null) period = Long.parseLong(value) * 1000;
+            period = Long.parseLong(value) * 60000;
 
             createNotificationChannel();
 
