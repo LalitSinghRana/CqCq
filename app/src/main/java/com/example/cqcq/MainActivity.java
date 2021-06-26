@@ -18,11 +18,11 @@ public class MainActivity extends AppCompatActivity {
     private Switch switch1;
 
     public static final String SHARED_PREF = "sharedPrefs";
-    public static final String NEXT_ALARM = "nextAlarm";
+//    public static final String NEXT_ALARM = "nextAlarm";
     public static final String SWITCH1 = "switch1";
 
     private boolean switchOnOff;
-    private String getNextAlarm;
+//    private String getNextAlarm;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,9 +34,6 @@ public class MainActivity extends AppCompatActivity {
 
         loadData();
         switch1.setChecked(switchOnOff);
-
-        TextView nextTime = findViewById(R.id.textView);
-        nextTime.setText("Next alarm at : " + getNextAlarm);
 
         switch1.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @RequiresApi(api = Build.VERSION_CODES.O)
@@ -69,16 +66,12 @@ public class MainActivity extends AppCompatActivity {
         SharedPreferences.Editor editor = sharedPreferences.edit();
 
         editor.putBoolean(SWITCH1, myBool);
-        if(!myBool) {
-            editor.putString(NEXT_ALARM, "");
-        }
         editor.apply();
     }
 
     public void loadData() {
         SharedPreferences sharedPreferences = getSharedPreferences(SHARED_PREF, MODE_PRIVATE);
         switchOnOff = sharedPreferences.getBoolean(SWITCH1,false);
-        getNextAlarm = sharedPreferences.getString(NEXT_ALARM, "");
     }
 }
 

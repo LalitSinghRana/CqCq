@@ -5,6 +5,7 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.media.MediaPlayer;
@@ -74,11 +75,11 @@ public class MyService extends Service {
     private Runnable updateTimerThread = new Runnable()
     {
         @RequiresApi(api = Build.VERSION_CODES.O)
-        public void run()
-        {
+        public void run() {
             //write here whatever you want to repeat
 //            System.out.println("Running: " + new java.util.Date());
-            saveData(value);
+            updateNotification();
+//            saveData(value);
             playSound();
             customHandler.postDelayed(this, period);
         }
@@ -97,6 +98,24 @@ public class MyService extends Service {
             NotificationManager manager = getSystemService(NotificationManager.class);
             manager.createNotificationChannel(notificationChannel);
         }
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    private void updateNotification() {
+        Intent intent1 = new Intent(this, MainActivity.class);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent1, 0);
+
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("hh:mm:ss a");
+        LocalDateTime now = LocalDateTime.now().plusMinutes(Integer.parseInt(value));
+
+        Notification notification = new NotificationCompat.Builder(this, "ChannelId1")
+                .setContentTitle("CqCq")
+                .setContentText("Next alarm at : " + dtf.format(now) )
+                .setSmallIcon(R.mipmap.ic_launcher)
+                .setContentIntent(pendingIntent).build();
+
+        NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        mNotificationManager.notify(1, notification);
     }
 
     @Nullable
@@ -120,16 +139,16 @@ public class MyService extends Service {
         mediaPlayer.start();
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
-    public void saveData(String interval) {
-        SharedPreferences sharedPreferences = getSharedPreferences(SHARED_PREF, MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-
-        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("hh:mm a");
-        LocalDateTime now = LocalDateTime.now().plusMinutes(Integer.parseInt(interval));
-//        System.out.println(dtf.format(now));
-
-        editor.putString(NEXT_ALARM, dtf.format(now));
-        editor.apply();
-    }
+//    @RequiresApi(api = Build.VERSION_CODES.O)
+//    public void saveData(String interval) {
+//        SharedPreferences sharedPreferences = getSharedPreferences(SHARED_PREF, MODE_PRIVATE);
+//        SharedPreferences.Editor editor = sharedPreferences.edit();
+//
+//        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("hh:mm a");
+//        LocalDateTime now = LocalDateTime.now().plusMinutes(Integer.parseInt(interval));
+////        System.out.println(dtf.format(now));
+//
+//        editor.putString(NEXT_ALARM, dtf.format(now));
+//        editor.apply();
+//    }
 }
