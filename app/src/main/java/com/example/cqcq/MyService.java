@@ -26,13 +26,16 @@ public class MyService extends Service {
     public static final String NEXT_ALARM = "nextAlarm";
     private Timer timer;
     Long period;
+    String value;
+
+    android.os.Handler customHandler = new android.os.Handler();
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         // write code for creating foreground service
 
         if (intent != null && intent.getExtras()!=null) {
-            String value = intent.getStringExtra("minutes");
+            value = intent.getStringExtra("minutes");
             period = Long.parseLong(value) * 60000;
 
             createNotificationChannel();
@@ -48,7 +51,9 @@ public class MyService extends Service {
 
             startForeground(1, notification);
 
-            timer = new Timer();
+            customHandler.postDelayed(updateTimerThread, 0);
+
+            /*timer = new Timer();
             TimerTask task = new TimerTask() {
                 @RequiresApi(api = Build.VERSION_CODES.O)
                 @Override
@@ -59,11 +64,28 @@ public class MyService extends Service {
                 }
             };
 
-            timer.scheduleAtFixedRate(task, 0,period);
+            timer.scheduleAtFixedRate(task, 0,period);*/
         } else {
             System.out.println("idk something happened");
         }
         return START_STICKY;
+    }
+
+    private Runnable updateTimerThread = new Runnable()
+    {
+        @RequiresApi(api = Build.VERSION_CODES.O)
+        public void run()
+        {
+            //write here whatever you want to repeat
+//            System.out.println("Running: " + new java.util.Date());
+            saveData(value);
+            playSound();
+            customHandler.postDelayed(this, period);
+        }
+    };
+
+    void stopRepeatingTask() {
+        customHandler.removeCallbacks(updateTimerThread);
     }
 
     private void createNotificationChannel() {
@@ -85,7 +107,8 @@ public class MyService extends Service {
 
     @Override
     public void onDestroy() {
-        timer.cancel();
+//        timer.cancel();
+        stopRepeatingTask();
         stopForeground(true);
         stopSelf();
 
