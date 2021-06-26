@@ -7,7 +7,6 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.media.MediaPlayer;
 import android.os.Build;
 import android.os.IBinder;
@@ -18,14 +17,12 @@ import androidx.core.app.NotificationCompat;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Timer;
-import java.util.TimerTask;
 
 
 public class MyService extends Service {
     public static final String SHARED_PREF = "sharedPrefs";
     public static final String NEXT_ALARM = "nextAlarm";
-    private Timer timer;
+//    private Timer timer;
     Long period;
     String value;
 
@@ -46,7 +43,7 @@ public class MyService extends Service {
 
             Notification notification = new NotificationCompat.Builder(this, "ChannelId1")
                     .setContentTitle("CqCq")
-                    .setContentText(value.equals("1") ? "Repeating period : 1 minute" : "Repeating period : " + value + " minutes")
+                    .setContentText("body")
                     .setSmallIcon(R.mipmap.ic_launcher)
                     .setContentIntent(pendingIntent).build();
 
@@ -139,16 +136,16 @@ public class MyService extends Service {
         mediaPlayer.start();
     }
 
-//    @RequiresApi(api = Build.VERSION_CODES.O)
-//    public void saveData(String interval) {
-//        SharedPreferences sharedPreferences = getSharedPreferences(SHARED_PREF, MODE_PRIVATE);
-//        SharedPreferences.Editor editor = sharedPreferences.edit();
-//
-//        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("hh:mm a");
-//        LocalDateTime now = LocalDateTime.now().plusMinutes(Integer.parseInt(interval));
-////        System.out.println(dtf.format(now));
-//
-//        editor.putString(NEXT_ALARM, dtf.format(now));
-//        editor.apply();
-//    }
+    /*@RequiresApi(api = Build.VERSION_CODES.O)
+    public void saveData(String interval) {
+        SharedPreferences sharedPreferences = getSharedPreferences(SHARED_PREF, MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("hh:mm a");
+        LocalDateTime now = LocalDateTime.now().plusMinutes(Integer.parseInt(interval));
+//        System.out.println(dtf.format(now));
+
+        editor.putString(NEXT_ALARM, dtf.format(now));
+        editor.apply();
+    }*/
 }
