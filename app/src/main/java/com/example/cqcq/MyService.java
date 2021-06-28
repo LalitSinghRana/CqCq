@@ -17,16 +17,14 @@ import androidx.core.app.NotificationCompat;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Timer;
+import java.util.TimerTask;
 
 
 public class MyService extends Service {
-    public static final String SHARED_PREF = "sharedPrefs";
-    public static final String NEXT_ALARM = "nextAlarm";
-//    private Timer timer;
-    Long period;
+    private Timer timer;
     String value;
 
-    android.os.Handler customHandler = new android.os.Handler();
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -34,7 +32,6 @@ public class MyService extends Service {
 
         if (intent != null && intent.getExtras()!=null) {
             value = intent.getStringExtra("minutes");
-            period = Long.parseLong(value) * 60000;
 
             createNotificationChannel();
 
@@ -49,41 +46,21 @@ public class MyService extends Service {
 
             startForeground(1, notification);
 
-            customHandler.postDelayed(updateTimerThread, 0);
-
-            /*timer = new Timer();
+            timer = new Timer();
             TimerTask task = new TimerTask() {
                 @RequiresApi(api = Build.VERSION_CODES.O)
                 @Override
                 public void run() {
-                    saveData(value);
+                    updateNotification();
                     playSound();
-//                    System.out.println(period);
                 }
             };
 
-            timer.scheduleAtFixedRate(task, 0,period);*/
+            timer.scheduleAtFixedRate(task, 0,Integer.parseInt(value)*60000);
         } else {
             System.out.println("idk something happened");
         }
         return START_STICKY;
-    }
-
-    private Runnable updateTimerThread = new Runnable()
-    {
-        @RequiresApi(api = Build.VERSION_CODES.O)
-        public void run() {
-            //write here whatever you want to repeat
-//            System.out.println("Running: " + new java.util.Date());
-            updateNotification();
-//            saveData(value);
-            playSound();
-            customHandler.postDelayed(this, period);
-        }
-    };
-
-    void stopRepeatingTask() {
-        customHandler.removeCallbacks(updateTimerThread);
     }
 
     private void createNotificationChannel() {
@@ -123,8 +100,7 @@ public class MyService extends Service {
 
     @Override
     public void onDestroy() {
-//        timer.cancel();
-        stopRepeatingTask();
+        timer.cancel();
         stopForeground(true);
         stopSelf();
 
@@ -135,17 +111,4 @@ public class MyService extends Service {
         MediaPlayer mediaPlayer=MediaPlayer.create(MyService.this,R.raw.glass_sound);
         mediaPlayer.start();
     }
-
-    /*@RequiresApi(api = Build.VERSION_CODES.O)
-    public void saveData(String interval) {
-        SharedPreferences sharedPreferences = getSharedPreferences(SHARED_PREF, MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-
-        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("hh:mm a");
-        LocalDateTime now = LocalDateTime.now().plusMinutes(Integer.parseInt(interval));
-//        System.out.println(dtf.format(now));
-
-        editor.putString(NEXT_ALARM, dtf.format(now));
-        editor.apply();
-    }*/
 }
