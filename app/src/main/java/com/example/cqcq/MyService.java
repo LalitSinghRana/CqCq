@@ -16,7 +16,10 @@ import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
+import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -24,14 +27,16 @@ import java.util.TimerTask;
 public class MyService extends Service {
     private Timer timer;
     String value;
+    Integer period;
 
-
+    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         // write code for creating foreground service
 
         if (intent != null && intent.getExtras()!=null) {
             value = intent.getStringExtra("minutes");
+            period = Integer.parseInt(value);
 
             createNotificationChannel();
 
@@ -45,6 +50,7 @@ public class MyService extends Service {
                     .setContentIntent(pendingIntent).build();
 
             startForeground(1, notification);
+            updateNotification();
 
             timer = new Timer();
             TimerTask task = new TimerTask() {
@@ -56,7 +62,11 @@ public class MyService extends Service {
                 }
             };
 
-            timer.scheduleAtFixedRate(task, 0,Integer.parseInt(value)*60000);
+            LocalDateTime time = LocalDateTime.now();
+            LocalDateTime nextTime = time.truncatedTo(ChronoUnit.HOURS)
+                    .plusMinutes((1 + (time.getMinute() / period)) * period);
+
+            timer.scheduleAtFixedRate(task, Date.from(nextTime.atZone(ZoneId.systemDefault()).toInstant()),Integer.parseInt(value)*60000);
         } else {
             System.out.println("idk something happened");
         }
@@ -80,11 +90,13 @@ public class MyService extends Service {
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent1, 0);
 
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("hh:mm:ss a");
-        LocalDateTime now = LocalDateTime.now().plusMinutes(Integer.parseInt(value));
+        LocalDateTime time = LocalDateTime.now();
+        LocalDateTime nextQuarter = time.truncatedTo(ChronoUnit.HOURS)
+                .plusMinutes((1 + (time.getMinute() / period)) * period);
 
         Notification notification = new NotificationCompat.Builder(this, "ChannelId1")
                 .setContentTitle("CqCq")
-                .setContentText("Next alarm at : " + dtf.format(now) )
+                .setContentText("Prev alarm ran at : " + dtf.format(time) + "\nNext alarm at : " + dtf.format(nextQuarter))
                 .setSmallIcon(R.mipmap.ic_launcher)
                 .setContentIntent(pendingIntent).build();
 
